@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Zhebe Logistics",
+    "slug": "zhebe-logistics",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "kz.zhebelogistics.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B2A5B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "kz.zhebelogistics.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-status-bar"
+    ],
+    "scheme": "zhebe",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B2A5B"
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
