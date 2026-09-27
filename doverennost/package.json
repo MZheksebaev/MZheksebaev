@@ -1,0 +1,11 @@
+{
+  "name": "zhebe-doverennost",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node web/build.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0"
+  }
+}

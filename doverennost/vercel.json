@@ -1,0 +1,16 @@
+{
+  "buildCommand": "node web/build.mjs",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/read.js": { "maxDuration": 120 }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    }
+  ]
+}

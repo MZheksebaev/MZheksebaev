@@ -4,3 +4,6 @@ templates/*
 !templates/.gitkeep
 output/
 __pycache__/
+dist/
+node_modules/
+.vercel/

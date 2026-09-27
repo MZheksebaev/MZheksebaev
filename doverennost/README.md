@@ -42,3 +42,23 @@ python generate.py --template templates/coca-cola.pdf \
 шаблона. Журнал выданных доверенностей хранится в браузере и выгружается в CSV
 для Excel. Пустой шаблон с печатью загружен в защищённое хранилище артефакта
 и в репозиторий не попадает. `web/poa.js` повторяет правила `generate.py`.
+
+## Публикация на Vercel
+
+Та же страница работает на своём хостинге: фото читает функция `api/read.js`
+через Claude API, PDF собирается в браузере.
+
+1. vercel.com → **Add New… → Project** → импортируйте репозиторий
+   `MZheksebaev/MZheksebaev`.
+2. **Root Directory**: `doverennost`. Framework Preset: **Other**. Остальное
+   Vercel возьмёт из `vercel.json` (сборка `node web/build.mjs`, папка `dist`).
+3. **Environment Variables**:
+   - `ANTHROPIC_API_KEY` — ключ с console.anthropic.com (оплата по факту
+     использования, отдельно от подписки Claude);
+   - `APP_PASSWORD` — пароль, который вводится на странице перед чтением фото.
+4. **Deploy**. Если нужна ветка не по умолчанию — Settings → Git →
+   Production Branch.
+5. На сайте один раз выберите файл пустого шаблона с печатью (PDF). Он
+   хранится только в браузере и на сервер не отправляется.
+
+Локальная проверка сборки: `npm install && npm run build`.
