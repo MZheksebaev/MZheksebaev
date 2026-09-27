@@ -92,8 +92,12 @@ def validate(poa: PowerOfAttorney) -> list[str]:
     errors = []
     if not iin_is_valid(poa.iin):
         errors.append(f"ИИН {poa.iin} не проходит проверку контрольной цифры")
-    if not re.fullmatch(r"\d{9}", poa.doc_number):
-        errors.append(f"Номер удостоверения {poa.doc_number} — ожидается 9 цифр")
+    # Удостоверение личности — 9 цифр, паспорт — 8 цифр (иногда с буквой N впереди).
+    if not re.fullmatch(r"\d{9}|N?\d{8}", poa.doc_number):
+        errors.append(
+            f"Номер документа {poa.doc_number} — ожидается 9 цифр (удостоверение) "
+            "или 8 цифр (паспорт)"
+        )
     try:
         datetime.strptime(poa.doc_date, "%d.%m.%Y")
     except ValueError:
@@ -176,7 +180,7 @@ def main() -> None:
     p.add_argument("--trailer-plate", required=True, help="Госномер прицепа, напр. 99AAT13")
     p.add_argument("--driver", required=True, help="ФИО водителя")
     p.add_argument("--iin", required=True)
-    p.add_argument("--doc-number", required=True, help="№ удостоверения личности")
+    p.add_argument("--doc-number", required=True, help="№ удостоверения (9 цифр) или паспорта (8 цифр)")
     p.add_argument("--doc-date", required=True, help="Дата выдачи, ДД.ММ.ГГГГ")
     p.add_argument("--from", dest="route_from", required=True, help="Откуда, напр. Алматы")
     p.add_argument("--to", dest="route_to", required=True, help="Куда, напр. Жетысай")
@@ -192,7 +196,7 @@ def main() -> None:
         trailer_plate=normalize_plate(a.trailer_plate),
         driver=" ".join(a.driver.split()),
         iin=a.iin.strip(),
-        doc_number=a.doc_number.strip(),
+        doc_number=re.sub(r"\s", "", a.doc_number).upper(),
         doc_date=a.doc_date.strip(),
         route_from=a.route_from.strip(),
         route_to=a.route_to.strip(),
