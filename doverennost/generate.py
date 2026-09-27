@@ -8,10 +8,10 @@
 Пример:
     python generate.py \
         --template templates/coca-cola.pdf \
-        --vehicle "VOLVO 099YSZ13/99AAT13" \
+        --truck-brand VOLVO --truck-plate 099YSZ13 --trailer-plate 99AAT13 \
         --driver "Агалиев Сулейман Ибрагимжанович" \
         --iin 770819302940 --doc-number 040849175 --doc-date 07.11.2016 \
-        --route "Алматы-Жетысай"
+        --from Алматы --to Жетысай
 """
 
 from __future__ import annotations
@@ -26,23 +26,37 @@ import pymupdf
 
 HERE = Path(__file__).resolve().parent
 FONT_FILE = HERE / "fonts" / "OpenSans-Regular.ttf"
-DEFAULT_VALID_DAYS = 10
+VALID_DAYS = 10  # доверенность всегда выдаётся на 10 дней
+
+# Кириллические буквы, которые выглядят как латинские, — в госномерах РК только латиница.
+LOOKALIKES = str.maketrans("АВЕКМНОРСТУХ", "ABEKMHOPCTYX")
 
 
 @dataclass
 class PowerOfAttorney:
-    vehicle: str
+    truck_brand: str
+    truck_plate: str
+    trailer_plate: str
     driver: str
     iin: str
     doc_number: str
     doc_date: str
-    route: str
+    route_from: str
+    route_to: str
     issue_date: date
-    valid_days: int = DEFAULT_VALID_DAYS
 
     @property
     def valid_until(self) -> date:
-        return self.issue_date + timedelta(days=self.valid_days)
+        return self.issue_date + timedelta(days=VALID_DAYS)
+
+    @property
+    def vehicle(self) -> str:
+        # Тягач — марка и номер, прицеп — только номер.
+        return f"{self.truck_brand} {self.truck_plate}/{self.trailer_plate}"
+
+    @property
+    def route(self) -> str:
+        return f"{self.route_from}-{self.route_to}"
 
     def lines(self) -> dict[str, str]:
         """Начало строки в шаблоне -> новый текст всей строки."""
@@ -84,6 +98,9 @@ def validate(poa: PowerOfAttorney) -> list[str]:
         datetime.strptime(poa.doc_date, "%d.%m.%Y")
     except ValueError:
         errors.append(f"Дата выдачи {poa.doc_date} — ожидается ДД.ММ.ГГГГ")
+    for label, plate in (("тягача", poa.truck_plate), ("прицепа", poa.trailer_plate)):
+        if not re.fullmatch(r"[0-9A-Z]{6,9}", plate):
+            errors.append(f"Госномер {label} {plate} — ожидаются латинские буквы и цифры")
     if len(poa.driver.split()) < 2:
         errors.append(f"ФИО водителя «{poa.driver}» — ожидается минимум фамилия и имя")
     return errors
@@ -144,35 +161,42 @@ def render(template: Path, poa: PowerOfAttorney, out: Path) -> Path:
 
 def default_output_name(poa: PowerOfAttorney) -> str:
     surname = poa.driver.split()[0]
-    plate = re.sub(r"[^\w]", "_", poa.vehicle.split()[-1])
-    return f"Доверенность_{poa.issue_date:%Y-%m-%d}_{surname}_{plate}.pdf"
+    return f"Доверенность_{poa.issue_date:%Y-%m-%d}_{surname}_{poa.truck_plate}.pdf"
+
+
+def normalize_plate(plate: str) -> str:
+    return re.sub(r"[\s-]", "", plate).upper().translate(LOOKALIKES)
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--template", required=True, type=Path)
-    p.add_argument("--vehicle", required=True, help='Напр. "VOLVO 099YSZ13/99AAT13"')
+    p.add_argument("--truck-brand", required=True, help="Марка тягача, напр. VOLVO")
+    p.add_argument("--truck-plate", required=True, help="Госномер тягача, напр. 099YSZ13")
+    p.add_argument("--trailer-plate", required=True, help="Госномер прицепа, напр. 99AAT13")
     p.add_argument("--driver", required=True, help="ФИО водителя")
     p.add_argument("--iin", required=True)
     p.add_argument("--doc-number", required=True, help="№ удостоверения личности")
     p.add_argument("--doc-date", required=True, help="Дата выдачи, ДД.ММ.ГГГГ")
-    p.add_argument("--route", required=True, help='Напр. "Алматы-Жетысай"')
+    p.add_argument("--from", dest="route_from", required=True, help="Откуда, напр. Алматы")
+    p.add_argument("--to", dest="route_to", required=True, help="Куда, напр. Жетысай")
     p.add_argument("--date", help="Дата доверенности ДД.ММ.ГГГГ (по умолчанию сегодня)")
-    p.add_argument("--valid-days", type=int, default=DEFAULT_VALID_DAYS)
     p.add_argument("--out", type=Path, help="Куда сохранить PDF")
     p.add_argument("--force", action="store_true", help="Игнорировать ошибки проверки")
     a = p.parse_args()
 
     issue = datetime.strptime(a.date, "%d.%m.%Y").date() if a.date else date.today()
     poa = PowerOfAttorney(
-        vehicle=a.vehicle.strip(),
+        truck_brand=a.truck_brand.strip().upper(),
+        truck_plate=normalize_plate(a.truck_plate),
+        trailer_plate=normalize_plate(a.trailer_plate),
         driver=" ".join(a.driver.split()),
         iin=a.iin.strip(),
         doc_number=a.doc_number.strip(),
         doc_date=a.doc_date.strip(),
-        route=a.route.strip(),
+        route_from=a.route_from.strip(),
+        route_to=a.route_to.strip(),
         issue_date=issue,
-        valid_days=a.valid_days,
     )
 
     errors = validate(poa)
