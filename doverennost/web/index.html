@@ -1,0 +1,686 @@
+<title>Доверенность водителю</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  :root {
+    --bg: #eef0ee;
+    --surface: #ffffff;
+    --surface-2: #f6f7f5;
+    --ink: #1c1e21;
+    --ink-2: #5b6167;
+    --line: #d9ddd9;
+    --accent: #f5c400;
+    --accent-ink: #1c1e21;
+    --mark: #fff1a8;
+    --ok: #1f7a4a;
+    --ok-bg: #e3f3ea;
+    --warn: #8a5a00;
+    --warn-bg: #fdf0d2;
+    --bad: #b3261e;
+    --bad-bg: #fbe4e2;
+    --paper: #ffffff;
+    --paper-ink: #1c1e21;
+    --focus: #2f6fdf;
+    --radius: 10px;
+    --display: "Unbounded", "Golos Text", system-ui, sans-serif;
+    --body: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #141618;
+      --surface: #1d2023;
+      --surface-2: #24282b;
+      --ink: #eceeed;
+      --ink-2: #a2a9ae;
+      --line: #33383c;
+      --mark: #5a4b00;
+      --ok: #6fd39c;
+      --ok-bg: #173325;
+      --warn: #f2c35b;
+      --warn-bg: #3a2e12;
+      --bad: #ff8a80;
+      --bad-bg: #3d1c1a;
+      --paper: #f4f4f1;
+      --focus: #7aa7ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #141618;
+    --surface: #1d2023;
+    --surface-2: #24282b;
+    --ink: #eceeed;
+    --ink-2: #a2a9ae;
+    --line: #33383c;
+    --mark: #5a4b00;
+    --ok: #6fd39c;
+    --ok-bg: #173325;
+    --warn: #f2c35b;
+    --warn-bg: #3a2e12;
+    --bad: #ff8a80;
+    --bad-bg: #3d1c1a;
+    --paper: #f4f4f1;
+    --focus: #7aa7ff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.5 var(--body);
+    padding-inline: 16px;
+    padding-block: 0 48px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding-block: 20px 16px;
+    border-bottom: 4px solid var(--accent);
+    margin-bottom: 20px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand svg { width: 44px; height: 30px; flex: none; }
+  h1 { font: 600 20px/1.2 var(--display); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+  .sub { color: var(--ink-2); font-size: 13px; margin: 2px 0 0; }
+  .client { font-size: 13px; color: var(--ink-2); text-align: right; }
+  .client b { color: var(--ink); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .stack { display: grid; gap: 16px; }
+  .step-h { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; }
+  .step-h .n {
+    font: 600 12px/1 var(--display); background: var(--accent); color: var(--accent-ink);
+    width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; flex: none;
+  }
+  .step-h h2 { font-size: 16px; font-weight: 600; margin: 0; }
+  .step-h .hint { color: var(--ink-2); font-size: 13px; margin-left: auto; }
+
+  .drop {
+    display: block; position: relative;
+    border: 2px dashed var(--line); border-radius: var(--radius); background: var(--surface-2);
+    padding: 18px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.over { border-color: var(--accent); }
+  .drop:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .drop p { margin: 4px 0; }
+  .drop .muted { color: var(--ink-2); font-size: 13px; }
+  .drop input { position: absolute; inset: 0; width: 1px; height: 1px; opacity: 0; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .thumb { position: relative; width: 76px; height: 96px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb button {
+    position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%;
+    border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 14px; line-height: 22px; cursor: pointer; padding: 0;
+  }
+  .row-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+
+  .btn {
+    font: 600 14px/1 var(--body); border-radius: 8px; padding: 11px 16px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  }
+  .btn:hover { border-color: var(--ink-2); }
+  .btn:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(.96); }
+  .btn.big { padding: 15px 20px; font-size: 15px; width: 100%; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.link { border: 0; background: none; padding: 6px 4px; color: var(--ink-2); text-decoration: underline; font-weight: 500; }
+
+  .status { font-size: 13px; color: var(--ink-2); }
+  .status.err { color: var(--bad); }
+
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px; padding: 0; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .fields .wide { grid-column: 1 / -1; }
+  .f label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .f input {
+    width: 100%; font: 15px/1.3 var(--body); color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px;
+  }
+  .f input.mono { font-family: var(--mono); font-size: 14px; letter-spacing: .02em; }
+  .f .msg { font-size: 12px; min-height: 16px; margin-top: 3px; color: var(--ink-2); }
+  .f.bad input { border-color: var(--bad); }
+  .f.bad .msg { color: var(--bad); }
+  .f.warn input { border-color: var(--warn); }
+  .f.warn .msg { color: var(--warn); }
+  .f.filled input { background: var(--surface); }
+  .group + .group { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  .checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .checks li { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 7px 10px; border-radius: 8px; }
+  .checks li::before { font-weight: 700; width: 14px; flex: none; text-align: center; }
+  .checks .ok { background: var(--ok-bg); color: var(--ok); }
+  .checks .ok::before { content: "✓"; }
+  .checks .warn { background: var(--warn-bg); color: var(--warn); }
+  .checks .warn::before { content: "!"; }
+  .checks .bad { background: var(--bad-bg); color: var(--bad); }
+  .checks .bad::before { content: "×"; }
+
+  .example-note {
+    display: flex; gap: 8px; align-items: center; font-size: 13px; background: var(--warn-bg); color: var(--warn);
+    border-radius: 8px; padding: 8px 12px; margin-bottom: 14px;
+  }
+
+  aside.side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; }
+  @media (max-width: 900px) { aside.side { position: static; } }
+  .paper {
+    background: var(--paper); color: var(--paper-ink); border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08);
+    aspect-ratio: 607 / 853; max-width: 100%; padding: 7% 8% 6%;
+    font: 10.5px/1.55 "Open Sans", var(--body); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .paper .lh { display: flex; justify-content: space-between; align-items: center; font-size: 7px; color: #777; border-bottom: 1px solid #999; padding-bottom: 6px; margin-bottom: 8px; }
+  .paper .lh svg { width: 46px; height: 30px; }
+  .paper .t { text-align: center; margin: 12px 0; }
+  .paper p { margin: 0 0 9px; overflow-wrap: anywhere; }
+  .paper .j { text-align: justify; text-indent: 1.5em; }
+  .paper mark { background: var(--mark); color: inherit; padding: 0 2px; border-radius: 2px; }
+  :root[data-theme="dark"] .paper mark { background: #fff1a8; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .paper mark { background: #fff1a8; } }
+  .paper .sign { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 10px; }
+  .paper .stamp { width: 58px; height: 58px; border-radius: 50%; border: 2px solid #3b64b8; color: #3b64b8; display: grid; place-items: center; font-size: 6px; text-align: center; opacity: .8; }
+  .paper .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: #f5c400; font: 700 7px/18px Arial, sans-serif; color: #555; text-align: center; }
+  .validity { font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .validity b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .journal { margin-top: 20px; }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 12px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; }
+  td.mono { font-family: var(--mono); font-size: 12.5px; }
+  .empty { color: var(--ink-2); font-size: 13px; padding: 12px 0; }
+  .confirm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 88 60" aria-hidden="true">
+        <path d="M2 4 L22 56 L34 26 L44 56 L54 26 L66 56 L86 4 L74 4 L66 30 L56 4 L44 36 L32 4 L22 30 L14 4 Z" fill="#6f6f6f"/>
+        <path d="M44 14 L58 56 L50 56 L44 38 L38 56 L30 56 Z" fill="#f5c400"/>
+      </svg>
+      <div>
+        <h1>Доверенность водителю</h1>
+        <p class="sub">ТОО «Zhebe Logistics» · срок действия всегда 10 дней</p>
+      </div>
+    </div>
+    <div class="client">Получить груз у<br><b>ТОО "Кока-Кола Алматы Боттлерс"</b></div>
+  </header>
+
+  <div class="grid">
+    <main class="stack">
+      <section class="panel" aria-labelledby="h-photos">
+        <div class="step-h"><span class="n">1</span><h2 id="h-photos">Фото документов</h2><span class="hint">удостоверение или паспорт, техпаспорт тягача и прицепа</span></div>
+        <label class="drop" id="drop">
+          <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple>
+          <p><b>Выберите фото</b> или перетащите сюда</p>
+          <p class="muted">1–4 фото в любом порядке. Можно всё на одном снимке.</p>
+        </label>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="row-actions">
+          <button class="btn primary" id="read-btn" type="button" disabled>Считать данные с фото</button>
+          <button class="btn" id="stop-btn" type="button" hidden>Остановить</button>
+          <span class="status" id="read-status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-data">
+        <div class="step-h"><span class="n">2</span><h2 id="h-data">Проверьте данные</h2><span class="hint">можно править вручную</span></div>
+        <div class="example-note" id="example-note">Пример с вымышленным водителем. Загрузите фото или впишите данные.</div>
+        <form id="form" novalidate>
+          <fieldset class="group">
+            <legend>Водитель</legend>
+            <div class="fields">
+              <div class="f wide" data-f="driver"><label for="driver">ФИО</label><input id="driver" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="iin"><label for="iin">ИИН</label><input id="iin" class="mono" inputmode="numeric" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="docNumber"><label for="docNumber">№ удостоверения / паспорта</label><input id="docNumber" class="mono" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="docDate"><label for="docDate">Дата выдачи (МВД РК)</label><input id="docDate" class="mono" placeholder="ДД.ММ.ГГГГ" autocomplete="off"><div class="msg"></div></div>
+            </div>
+          </fieldset>
+          <fieldset class="group">
+            <legend>Автотранспорт</legend>
+            <div class="fields">
+              <div class="f" data-f="truckBrand"><label for="truckBrand">Марка тягача</label><input id="truckBrand" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="truckPlate"><label for="truckPlate">Госномер тягача</label><input id="truckPlate" class="mono" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="trailerPlate"><label for="trailerPlate">Госномер прицепа</label><input id="trailerPlate" class="mono" autocomplete="off"><div class="msg"></div></div>
+            </div>
+          </fieldset>
+          <fieldset class="group">
+            <legend>Маршрут и дата</legend>
+            <div class="fields">
+              <div class="f" data-f="routeFrom"><label for="routeFrom">Откуда</label><input id="routeFrom" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="routeTo"><label for="routeTo">Куда</label><input id="routeTo" autocomplete="off"><div class="msg"></div></div>
+              <div class="f" data-f="issueDate"><label for="issueDate">Дата доверенности</label><input id="issueDate" class="mono" placeholder="ДД.ММ.ГГГГ" autocomplete="off"><div class="msg"></div></div>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="h-checks">
+        <div class="step-h"><span class="n">3</span><h2 id="h-checks">Проверки</h2></div>
+        <ul class="checks" id="checks"></ul>
+      </section>
+    </main>
+
+    <aside class="side" aria-label="Предпросмотр">
+      <div class="paper" id="paper" aria-label="Предпросмотр доверенности">
+        <div class="lh">
+          <span>Raiymbek Ave. 211, BC «Zhetysu»<br>Almaty, Kazakhstan</span>
+          <svg viewBox="0 0 88 60" aria-hidden="true">
+            <path d="M2 4 L22 56 L34 26 L44 56 L54 26 L66 56 L86 4 L74 4 L66 30 L56 4 L44 36 L32 4 L22 30 L14 4 Z" fill="#6f6f6f"/>
+            <path d="M44 14 L58 56 L50 56 L44 38 L38 56 L30 56 Z" fill="#f5c400"/>
+          </svg>
+          <span style="text-align:right">г. Алматы, пр-т Райымбека 211<br>БЦ «Жетысу», 3 этаж</span>
+        </div>
+        <p id="p-date"></p>
+        <p class="t">Доверенность</p>
+        <p class="j">Товарищество с ограниченной ответственностью «Zhebe Logistics» в лице директора Тансыккожин А.Д. действующего на основании Устава, настоящей доверенностью уполномочивает, получить груз от компании: ТОО "Кока-Кола Алматы Боттлерс"</p>
+        <p id="p-vehicle"></p>
+        <p id="p-driver"></p>
+        <p id="p-doc"></p>
+        <p id="p-route"></p>
+        <p class="j" style="margin-top:6px">Сопроводительные документы, обладая правами подписи в сопроводительных документах, доставлять груз и сопроводительные документы получателю.</p>
+        <p id="p-valid"></p>
+        <div class="sign"><span>Операционный директор<br>ТОО «Zhebe Logistics»</span><span class="stamp">печать и подпись</span><span>Солтубекова Ж.Н.</span></div>
+        <div class="foot">zhebelogistics.kz</div>
+      </div>
+      <div class="validity"><span>Действует: <b id="v-from"></b> — <b id="v-to"></b></span><span>10 дней</span></div>
+      <button class="btn primary big" id="pdf-btn" type="button">Скачать PDF</button>
+      <div class="status" id="pdf-status" aria-live="polite"></div>
+    </aside>
+  </div>
+
+  <section class="panel journal" aria-labelledby="h-journal">
+    <div class="step-h"><h2 id="h-journal">Журнал выданных доверенностей</h2><span class="hint">хранится только в этом браузере</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Дата</th><th>До</th><th>Водитель</th><th>ИИН</th><th>№ документа</th><th>Тягач</th><th>Прицеп</th><th>Маршрут</th></tr></thead>
+        <tbody id="journal-body"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="journal-empty">Пока пусто. После каждого скачанного PDF здесь появится строка.</div>
+    <div class="row-actions">
+      <button class="btn" id="csv-btn" type="button">Выгрузить в Excel (CSV)</button>
+      <span class="confirm" id="clear-wrap"></span>
+      <span class="status" id="journal-status" aria-live="polite"></span>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="poa.js"></script>
+<script>
+(function () {
+  "use strict";
+  var TEMPLATE_URL = "/_blob/582e025b8a00424b03f581f76ce8ea02";
+  var FONT_URL = "fonts/OpenSans-Regular.ttf";
+  var JOURNAL_KEY = "zhebe-poa-journal-v1";
+  var FIELDS = ["driver", "iin", "docNumber", "docDate", "truckBrand", "truckPlate", "trailerPlate", "routeFrom", "routeTo", "issueDate"];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var photos = [];          // [{file, url}]
+  var extracted = null;     // сведения с фото для перекрёстных проверок
+  var isExample = true;
+  var sampleApi = null, downloadsApi = null, imageLimits = null;
+  var controller = null;
+
+  // ---------- форма ----------
+  function today() { return POA.fmt(new Date()); }
+  function readForm() {
+    var raw = {};
+    FIELDS.forEach(function (k) { raw[k] = $(k).value; });
+    return POA.normalize(raw);
+  }
+  function setForm(values) {
+    FIELDS.forEach(function (k) {
+      if (values[k] != null && values[k] !== "") $(k).value = values[k];
+    });
+  }
+
+  var EXAMPLE = {
+    driver: "Қасымов Ерлан Жұмабекұлы", iin: "850312300121", docNumber: "051234567", docDate: "15.03.2019",
+    truckBrand: "DAF", truckPlate: "777KZA01", trailerPlate: "45XYZ01", routeFrom: "Алматы", routeTo: "Шымкент",
+  };
+  setForm(EXAMPLE);
+  $("issueDate").value = today();
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  function m(s) { return "<mark>" + escapeHtml(s || "…") + "</mark>"; }
+
+  function render() {
+    var d = readForm();
+    var errs = POA.validate(d);
+    FIELDS.forEach(function (k) {
+      var box = document.querySelector('[data-f="' + k + '"]');
+      var msg = errs[k] || "";
+      box.classList.toggle("bad", !!msg && POA.isBlocking(msg));
+      box.classList.toggle("warn", !!msg && !POA.isBlocking(msg));
+      box.querySelector(".msg").textContent = msg;
+    });
+
+    var issue = POA.parseDate(d.issueDate);
+    var until = issue ? POA.addDays(issue, POA.VALID_DAYS) : null;
+    $("p-date").innerHTML = "от " + m(issue ? POA.fmt(issue) : d.issueDate) + " г.";
+    $("p-vehicle").innerHTML = "На автотранспорт: " + m(d.truckBrand + " " + d.truckPlate + "/" + d.trailerPlate);
+    $("p-driver").innerHTML = "Данные водителя: " + m(d.driver) + ",";
+    $("p-doc").innerHTML = "ИИН: " + m(d.iin) + " № " + m(d.docNumber) + " Выдан: МВД РК от " + m(d.docDate);
+    $("p-route").innerHTML = "По маршруту: " + m(d.routeFrom + "-" + d.routeTo);
+    $("p-valid").innerHTML = "Срок действия доверенности действителен до " + m(until ? POA.fmt(until) : "") + " без права передоверия.";
+    $("v-from").textContent = issue ? POA.fmt(issue) : "—";
+    $("v-to").textContent = until ? POA.fmt(until) : "—";
+
+    renderChecks(d, errs);
+    var blocking = Object.keys(errs).some(function (k) { return POA.isBlocking(errs[k]); });
+    $("pdf-btn").disabled = blocking || !downloadsApi;
+  }
+
+  function renderChecks(d, errs) {
+    var items = [];
+    function add(kind, text) { items.push([kind, text]); }
+    if (!errs.iin) add("ok", "ИИН " + d.iin + ": контрольная цифра верна");
+    else add("bad", errs.iin);
+
+    var birthFromIin = /^\d{6}/.test(d.iin) ? d.iin.slice(4, 6) + "." + d.iin.slice(2, 4) + "." : null;
+    if (extracted && extracted.birthDate && birthFromIin) {
+      var b = String(extracted.birthDate);
+      if (b.slice(0, 6) === birthFromIin && b.slice(-2) === d.iin.slice(0, 2)) add("ok", "Дата рождения " + b + " совпадает с ИИН");
+      else add("bad", "Дата рождения " + b + " не совпадает с ИИН — проверьте цифры ИИН");
+    }
+    if (extracted && extracted.mrzIin) {
+      if (extracted.mrzIin === d.iin) add("ok", "ИИН совпадает с машиночитаемой строкой на обороте");
+      else add("bad", "ИИН отличается от машиночитаемой строки на обороте (" + extracted.mrzIin + ")");
+    }
+    if (extracted && extracted.mrzDocNumber) {
+      if (extracted.mrzDocNumber === d.docNumber) add("ok", "№ документа совпадает с машиночитаемой строкой");
+      else add("bad", "№ документа отличается от машиночитаемой строки (" + extracted.mrzDocNumber + ")");
+    }
+    if (!errs.docNumber) add("ok", "№ документа: " + (d.docNumber.replace(/^N/, "").length === 9 ? "удостоверение, 9 цифр" : "паспорт, 8 цифр"));
+    ["truckPlate", "trailerPlate"].forEach(function (k) {
+      var label = k === "truckPlate" ? "Госномер тягача " : "Госномер прицепа ";
+      if (!errs[k]) add("ok", label + d[k] + ": формат верный");
+      else add(POA.isBlocking(errs[k]) ? "bad" : "warn", label + d[k] + ": " + errs[k].toLowerCase());
+    });
+    if (/O/.test(d.truckPlate + d.trailerPlate) || /0/.test((d.truckPlate.slice(3, 6)) + d.trailerPlate.slice(2, 5)))
+      add("warn", "В номере есть «O» или «0» — на фото их легко спутать, сверьте с оригиналом");
+    if (extracted && extracted.owner) {
+      var owner = extracted.owner.toLocaleLowerCase("ru");
+      var surname = (d.driver.split(" ")[0] || "").toLocaleLowerCase("ru");
+      if (surname && owner.indexOf(surname) === -1) add("warn", "Владелец ТС по техпаспорту — " + extracted.owner + ", не водитель. Обычно это нормально.");
+    }
+    (extracted && extracted.uncertain || []).forEach(function (t) { add("warn", "Claude: " + t); });
+    (extracted && extracted.missing || []).forEach(function (t) { add("bad", "Нет на фото: " + t); });
+    if (!d.routeFrom || !d.routeTo) add("bad", "Маршрута нет в документах — впишите «Откуда» и «Куда»");
+
+    var ul = $("checks");
+    ul.textContent = "";
+    items.forEach(function (it) {
+      var li = document.createElement("li");
+      li.className = it[0];
+      li.textContent = it[1];
+      ul.appendChild(li);
+    });
+  }
+
+  FIELDS.forEach(function (k) {
+    $(k).addEventListener("input", function () {
+      if (isExample && k !== "issueDate") { isExample = false; $("example-note").hidden = true; }
+      render();
+    });
+  });
+  $("form").addEventListener("submit", function (e) { e.preventDefault(); });
+
+  // ---------- фото ----------
+  function addFiles(list) {
+    Array.prototype.forEach.call(list, function (file) {
+      if (!/^image\//.test(file.type)) return;
+      photos.push({ file: file, url: URL.createObjectURL(file) });
+    });
+    renderThumbs();
+  }
+  function renderThumbs() {
+    var box = $("thumbs");
+    box.textContent = "";
+    photos.forEach(function (p, i) {
+      var t = document.createElement("div");
+      t.className = "thumb";
+      var img = document.createElement("img");
+      img.src = p.url; img.alt = "Фото " + (i + 1);
+      var x = document.createElement("button");
+      x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Убрать фото " + (i + 1));
+      x.addEventListener("click", function () { URL.revokeObjectURL(p.url); photos.splice(i, 1); renderThumbs(); });
+      t.appendChild(img); t.appendChild(x); box.appendChild(t);
+    });
+    $("read-btn").disabled = !photos.length || !sampleApi || !imageLimits;
+    if (imageLimits && photos.length > imageLimits.maxCount)
+      status("read-status", "За один раз можно отправить до " + imageLimits.maxCount + " фото — лишние уберите.", true);
+    else if (!controller) status("read-status", "");
+  }
+  $("photo-input").addEventListener("change", function (e) { addFiles(e.target.files); e.target.value = ""; });
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { if (e.dataTransfer) addFiles(e.dataTransfer.files); });
+
+  function status(id, text, isErr) { var el = $(id); el.textContent = text; el.classList.toggle("err", !!isErr); }
+
+  var PROMPT = [
+    "Ты считываешь казахстанские документы водителя грузовика для доверенности. На фото могут быть (в любом порядке, на одном или нескольких снимках):",
+    "- удостоверение личности РК (лицевая сторона: фамилия, имя, отчество, дата рождения, ЖСН/ИИН; оборот: номер документа 9 цифр вверху справа, орган выдачи, дата выдачи, машиночитаемая строка MRZ вида IDKAZ<9 цифр номера><контр.цифра><12 цифр ИИН><<<);",
+    "- или паспорт РК (номер 8 цифр, часто с буквой N впереди);",
+    "- техпаспорт тягача (свидетельство о регистрации ТС): поле 1 — госномер, поле 2 — марка и модель, поле 11 — владелец, поле 13 — мощность > 0 kW, категория C/N3;",
+    "- техпаспорт прицепа: поле 1 — госномер, поле 2 — марка, мощность 0 kW, категория O/O4.",
+    "",
+    "Верни ТОЛЬКО JSON без пояснений такого вида:",
+    '{"docType":"id_card"|"passport"|null,"surname":"","name":"","patronymic":"","iin":"","docNumber":"","docIssueDate":"ДД.ММ.ГГГГ","birthDate":"ДД.ММ.ГГГГ","mrzDocNumber":null,"mrzIin":null,',
+    '"truck":{"brand":"","model":"","plate":"","owner":""}|null,"trailer":{"brand":"","plate":"","owner":""}|null,"uncertain":[],"missing":[]}',
+    "",
+    "Правила:",
+    "- ФИО пиши кириллицей точно как в документе, включая казахские буквы (Ә, Ғ, Қ, Ң, Ө, Ұ, Ү, Һ, І).",
+    "- iin — 12 цифр; docNumber — как напечатан (9 цифр у удостоверения; у паспорта 8 цифр, букву N сохрани).",
+    "- mrzDocNumber и mrzIin — только если MRZ на обороте читается; иначе null. Не переписывай их с лицевой стороны.",
+    "- brand тягача — только марка (DAF, VOLVO, MAN, SCANIA…), модель отдельно в model.",
+    "- plate — латиницей без пробелов (например 987ARP13). Номер тягача: 3 цифры + 3 буквы + 2 цифры; прицепа: 2 цифры + 3 буквы + 2 цифры.",
+    "- Если символ читается неоднозначно (O/0, B/8, 1/7 и т.п.) — впиши лучший вариант и добавь в uncertain короткую фразу по-русски, какое поле и какой символ под вопросом.",
+    "- Если какого-то документа нет на фото — добавь в missing по-русски (например \"техпаспорт прицепа\") и оставь соответствующие поля пустыми/null.",
+    "- Ничего не выдумывай.",
+  ].join("\n");
+
+  $("read-btn").addEventListener("click", async function () {
+    if (!sampleApi || !photos.length) return;
+    var files = photos.slice(0, imageLimits ? imageLimits.maxCount : photos.length).map(function (p) { return p.file; });
+    controller = new AbortController();
+    $("read-btn").disabled = true; $("stop-btn").hidden = false;
+    status("read-status", "Claude читает документы… обычно 20–60 секунд");
+    try {
+      var r = await sampleApi.json(PROMPT, { images: files, modelTier: "complex", signal: controller.signal, cache: false });
+      applyExtraction(r || {});
+      status("read-status", "Готово. Проверьте поля и впишите маршрут.");
+    } catch (e) {
+      var code = e && e.code;
+      var text = code === "cancelled" ? "Остановлено." :
+        code === "not_granted" ? "Без разрешения на запросы к Claude фото не прочитать. Данные можно вписать вручную." :
+        code === "rate_limited" ? "Слишком много запросов подряд. Подождите минуту и попробуйте снова." :
+        code === "image_rejected" ? "Одно из фото не подходит (формат или размер). Попробуйте JPEG или PNG." :
+        "Не удалось прочитать фото (" + (code || "ошибка") + "). Попробуйте ещё раз или впишите данные вручную.";
+      status("read-status", text, code !== "cancelled");
+    } finally {
+      controller = null;
+      $("stop-btn").hidden = true;
+      $("read-btn").disabled = !photos.length;
+    }
+  });
+  $("stop-btn").addEventListener("click", function () { if (controller) controller.abort(); });
+
+  function applyExtraction(r) {
+    isExample = false; $("example-note").hidden = true;
+    FIELDS.forEach(function (k) { if (k !== "issueDate" && k !== "routeFrom" && k !== "routeTo") $(k).value = ""; });
+    var fio = [r.surname, r.name, r.patronymic].filter(Boolean).join(" ");
+    var truck = r.truck || {}, trailer = r.trailer || {};
+    setForm({
+      driver: fio, iin: r.iin, docNumber: r.docNumber, docDate: r.docIssueDate,
+      truckBrand: truck.brand, truckPlate: truck.plate, trailerPlate: trailer.plate,
+    });
+    extracted = {
+      birthDate: r.birthDate || null,
+      mrzIin: r.mrzIin ? String(r.mrzIin).replace(/\D/g, "") : null,
+      mrzDocNumber: r.mrzDocNumber ? String(r.mrzDocNumber).replace(/\s/g, "").toUpperCase() : null,
+      owner: truck.owner || trailer.owner || null,
+      uncertain: Array.isArray(r.uncertain) ? r.uncertain.map(String) : [],
+      missing: Array.isArray(r.missing) ? r.missing.map(String) : [],
+    };
+    FIELDS.forEach(function (k) { document.querySelector('[data-f="' + k + '"]').classList.toggle("filled", !!$(k).value); });
+    render();
+    if (!$("routeFrom").value || !$("routeTo").value) $(!$("routeFrom").value ? "routeFrom" : "routeTo").focus();
+  }
+
+  // ---------- PDF ----------
+  var assetsCache = null;
+  async function loadAssets() {
+    if (assetsCache) return assetsCache;
+    var res = await Promise.all([fetch(TEMPLATE_URL), fetch(FONT_URL)]);
+    if (!res[0].ok) throw new Error("template " + res[0].status);
+    if (!res[1].ok) throw new Error("font " + res[1].status);
+    assetsCache = await Promise.all([res[0].arrayBuffer(), res[1].arrayBuffer()]);
+    return assetsCache;
+  }
+
+  $("pdf-btn").addEventListener("click", async function () {
+    var d = readForm();
+    var errs = POA.validate(d);
+    if (Object.keys(errs).some(function (k) { return POA.isBlocking(errs[k]); })) { render(); return; }
+    if (!window.PDFLib || !window.fontkit) { status("pdf-status", "Библиотека PDF не загрузилась. Обновите страницу.", true); return; }
+    $("pdf-btn").disabled = true;
+    status("pdf-status", "Собираю PDF…");
+    try {
+      var a = await loadAssets();
+      var bytes = await POA.buildPdf(a[0].slice(0), a[1].slice(0), d);
+      var name = POA.fileName(d);
+      await downloadsApi.save({ filename: name, data: new Blob([bytes], { type: "application/pdf" }) });
+      addJournal(d);
+      status("pdf-status", "Сохранено: " + name);
+    } catch (e) {
+      var code = e && e.code;
+      status("pdf-status",
+        code === "declined" ? "Сохранение отменено." :
+        code ? "Не удалось сохранить файл (" + code + ")." :
+        "Не удалось собрать PDF: " + (e && e.message || e), code !== "declined");
+    } finally {
+      render();
+    }
+  });
+
+  // ---------- журнал ----------
+  function loadJournal() {
+    try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); } catch (e) { return []; }
+  }
+  function saveJournal(rows) {
+    try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(rows)); } catch (e) { /* хранилище недоступно */ }
+  }
+  function addJournal(d) {
+    var issue = POA.parseDate(d.issueDate);
+    var rows = loadJournal();
+    rows.unshift({
+      date: POA.fmt(issue), until: POA.fmt(POA.addDays(issue, POA.VALID_DAYS)), driver: d.driver, iin: d.iin,
+      doc: d.docNumber, truck: d.truckBrand + " " + d.truckPlate, trailer: d.trailerPlate, route: d.routeFrom + "-" + d.routeTo,
+    });
+    saveJournal(rows);
+    renderJournal();
+  }
+  var COLS = [["date", "Дата"], ["until", "До"], ["driver", "Водитель"], ["iin", "ИИН"], ["doc", "№ документа"], ["truck", "Тягач"], ["trailer", "Прицеп"], ["route", "Маршрут"]];
+  function renderJournal() {
+    var rows = loadJournal();
+    var body = $("journal-body");
+    body.textContent = "";
+    rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      COLS.forEach(function (c) {
+        var td = document.createElement("td");
+        td.textContent = r[c[0]] || "";
+        if (/iin|doc|truck|trailer/.test(c[0])) td.className = "mono";
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    $("journal-empty").hidden = rows.length > 0;
+    $("csv-btn").disabled = !rows.length || !downloadsApi;
+    if ($("clear-btn")) $("clear-btn").disabled = !rows.length;
+  }
+  $("csv-btn").addEventListener("click", async function () {
+    var rows = loadJournal();
+    var q = function (v) { v = String(v == null ? "" : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    // ИИН и номера — как текст, иначе Excel срежет ведущие нули.
+    var asText = function (v) { return '="' + String(v || "").replace(/"/g, "") + '"'; };
+    var lines = [COLS.map(function (c) { return c[1]; }).join(";")];
+    rows.slice().reverse().forEach(function (r) {
+      lines.push(COLS.map(function (c) { return /iin|doc/.test(c[0]) ? asText(r[c[0]]) : q(r[c[0]]); }).join(";"));
+    });
+    try {
+      await downloadsApi.save({ filename: "Журнал_доверенностей_" + today().split(".").reverse().join("-") + ".csv", data: "﻿" + lines.join("\r\n") });
+      status("journal-status", "Файл сохранён. Откройте его в Excel.");
+    } catch (e) {
+      status("journal-status", e && e.code === "declined" ? "Сохранение отменено." : "Не удалось сохранить файл.", !(e && e.code === "declined"));
+    }
+  });
+  function showClearButton() {
+    var wrap = $("clear-wrap");
+    wrap.textContent = "";
+    var b = document.createElement("button");
+    b.className = "btn link"; b.id = "clear-btn"; b.type = "button"; b.textContent = "Очистить журнал";
+    b.disabled = !loadJournal().length;
+    b.addEventListener("click", askClear);
+    wrap.appendChild(b);
+  }
+  function askClear() {
+    var wrap = $("clear-wrap");
+    wrap.textContent = "";
+    var label = document.createElement("span"); label.textContent = "Удалить все записи?";
+    var yes = document.createElement("button"); yes.className = "btn"; yes.type = "button"; yes.textContent = "Удалить";
+    var no = document.createElement("button"); no.className = "btn link"; no.type = "button"; no.textContent = "Отмена";
+    yes.addEventListener("click", function () {
+      saveJournal([]); showClearButton(); renderJournal(); status("journal-status", "Журнал очищен.");
+    });
+    no.addEventListener("click", showClearButton);
+    wrap.appendChild(label); wrap.appendChild(yes); wrap.appendChild(no);
+    no.focus();
+  }
+  showClearButton();
+
+  // ---------- возможности просмотрщика ----------
+  render();
+  renderJournal();
+  renderThumbs();
+  if (window.claude && window.claude.use) {
+    window.claude.use("sample").then(async function (s) {
+      sampleApi = s;
+      if (!s) { status("read-status", "Чтение фото здесь недоступно — впишите данные вручную."); return; }
+      var lim = await s.limits().catch(function () { return null; });
+      imageLimits = lim && lim.images ? lim.images : null;
+      if (!imageLimits) status("read-status", "Отправка фото здесь недоступна — впишите данные вручную.");
+      renderThumbs();
+    });
+    window.claude.use("downloads").then(function (dl) {
+      downloadsApi = dl;
+      if (!dl) status("pdf-status", "Скачивание файлов здесь недоступно. Откройте страницу в claude.ai.", true);
+      render(); renderJournal();
+    });
+  } else {
+    status("read-status", "Откройте страницу в claude.ai, чтобы читать фото.");
+    status("pdf-status", "Откройте страницу в claude.ai, чтобы скачивать PDF.", true);
+  }
+})();
+</script>
